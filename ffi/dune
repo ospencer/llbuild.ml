@@ -1,0 +1,4 @@
+(library
+ (name llbuild_ffi)
+ (public_name llbuild.ffi)
+ (libraries ctypes))

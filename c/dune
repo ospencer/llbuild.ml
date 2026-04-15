@@ -1,0 +1,117 @@
+(data_only_dirs llbuild)
+
+(library
+ (name libllbuild_c)
+ (public_name libllbuild.c)
+ (no_dynlink)
+ (foreign_archives llbuild_combined)
+ (c_library_flags
+  (:include c_library_flags.sexp))
+ (install_c_headers
+  llbuild
+  llbuild-defines
+  core
+  buildsystem
+  db
+  buildkey
+  buildvalue))
+
+; Copy headers from the llbuild source tree
+
+(rule
+ (targets
+  llbuild.h
+  llbuild-defines.h
+  core.h
+  buildsystem.h
+  db.h
+  buildkey.h
+  buildvalue.h
+  ninja.h)
+ (deps (source_tree llbuild/products/libllbuild/include/llbuild))
+ (action
+  (progn
+   (copy llbuild/products/libllbuild/include/llbuild/llbuild.h llbuild.h)
+   (copy llbuild/products/libllbuild/include/llbuild/llbuild-defines.h llbuild-defines.h)
+   (copy llbuild/products/libllbuild/include/llbuild/core.h core.h)
+   (copy llbuild/products/libllbuild/include/llbuild/buildsystem.h buildsystem.h)
+   (copy llbuild/products/libllbuild/include/llbuild/db.h db.h)
+   (copy llbuild/products/libllbuild/include/llbuild/buildkey.h buildkey.h)
+   (copy llbuild/products/libllbuild/include/llbuild/buildvalue.h buildvalue.h)
+   (copy llbuild/products/libllbuild/include/llbuild/ninja.h ninja.h))))
+
+; Build llbuild via CMake and produce a combined static archive.
+; We build static libraries and merge them into one archive so dune
+; can link against a single (foreign_archives llbuild_combined).
+;
+; The merge script auto-detects macOS (libtool) vs Linux (ar -M).
+; It also includes vendored SQLite3 if CMake fetched it.
+
+(rule
+ (targets libllbuild_combined.a dllllbuild_combined%{ext_dll})
+ (deps (source_tree llbuild))
+ (locks llbuild-build)
+ (enabled_if
+  (or
+   (= %{system} macosx)
+   (and
+    (<> %{system} win64)
+    (<> %{system} mingw64))))
+ (action
+  (no-infer
+   (bash "set -e && cmake -S llbuild -B llbuild/_build -G 'Unix Makefiles' -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_FLAGS=-w -DCMAKE_CXX_FLAGS=-w && cmake --build llbuild/_build --config Release --target llbuild -- -j 4 && ARCHIVES='llbuild/_build/lib/libllbuild.a llbuild/_build/lib/libllbuildCore.a llbuild/_build/lib/libllbuildBuildSystem.a llbuild/_build/lib/libllbuildBasic.a llbuild/_build/lib/libllbuildNinja.a llbuild/_build/lib/libllvmSupport.a llbuild/_build/lib/libllvmDemangle.a' && for f in llbuild/_build/lib/libSQLite3.a llbuild/_build/lib/libsqlite3.a; do if [ -f $f ]; then ARCHIVES=\"$ARCHIVES $f\"; fi; done && if [ $(uname) = Darwin ]; then libtool -static -o libllbuild_combined.a $ARCHIVES; else (printf 'CREATE libllbuild_combined.a\\n'; for a in $ARCHIVES; do printf 'ADDLIB %s\\n' $a; done; printf 'SAVE\\nEND\\n') | ar -M && ranlib libllbuild_combined.a; fi && touch dllllbuild_combined%{ext_dll}"))))
+
+; Windows (mingw64)
+(rule
+ (targets libllbuild_combined.a dllllbuild_combined%{ext_dll})
+ (deps (source_tree llbuild))
+ (locks llbuild-build)
+ (enabled_if
+  (or
+   (= %{system} win64)
+   (= %{system} mingw64)))
+ (action
+  (no-infer
+   (progn
+    (run cmake -S llbuild -B llbuild/_build
+     -G "Unix Makefiles"
+     -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc
+     -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
+     -DCMAKE_SYSTEM_NAME=Windows
+     -DBUILD_SHARED_LIBS=OFF
+     -DBUILD_TESTING=OFF
+     -DCMAKE_BUILD_TYPE=Release
+     -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+     "-DCMAKE_C_FLAGS=-w -D_Nonnull= -D_Nullable="
+     "-DCMAKE_CXX_FLAGS=-w -fpermissive -D_Nonnull= -D_Nullable=")
+    (run cmake --build llbuild/_build --config Release --target llbuild -- -j 4)
+    (bash "ARCHIVES='llbuild/_build/lib/libllbuild.a llbuild/_build/lib/libllbuildCore.a llbuild/_build/lib/libllbuildBuildSystem.a llbuild/_build/lib/libllbuildBasic.a llbuild/_build/lib/libllbuildNinja.a llbuild/_build/lib/libllvmSupport.a llbuild/_build/lib/libllvmDemangle.a'; for f in llbuild/_build/lib/libSQLite3.a llbuild/_build/lib/libsqlite3.a; do if [ -f $f ]; then ARCHIVES=\"$ARCHIVES $f\"; fi; done; (printf 'CREATE libllbuild_combined.a\\n'; for a in $ARCHIVES; do printf 'ADDLIB %s\\n' $a; done; printf 'SAVE\\nEND\\n') | ar -M && ranlib libllbuild_combined.a")
+    (bash "touch dllllbuild_combined%{ext_dll}")))))
+
+; Platform-specific link flags
+
+(rule
+ (targets c_library_flags.sexp)
+ (enabled_if
+  (= %{system} macosx))
+ (action
+  (write-file %{targets} "(-lc++ -lcurses)")))
+
+(rule
+ (targets c_library_flags.sexp)
+ (enabled_if
+  (and
+   (<> %{system} macosx)
+   (<> %{system} win64)
+   (<> %{system} mingw64)))
+ (action
+  (write-file %{targets} "(-lstdc++ -lpthread -lcurses)")))
+
+(rule
+ (targets c_library_flags.sexp)
+ (enabled_if
+  (or
+   (= %{system} win64)
+   (= %{system} mingw64)))
+ (action
+  (write-file %{targets} "(-lstdc++)")))

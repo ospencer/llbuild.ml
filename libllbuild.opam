@@ -1,0 +1,24 @@
+opam-version: "2.0"
+version: "0.1.0"
+synopsis: "Libllbuild packaged for OCaml"
+maintainer: "oscar@grain-lang.org"
+author: "Oscar Spencer"
+license: "Apache-2.0"
+homepage: "https://github.com/grain-lang/llbuild.ml"
+dev-repo: "git+https://github.com/grain-lang/llbuild.ml.git"
+bug-reports: "https://github.com/grain-lang/llbuild.ml/issues"
+build: [
+  ["dune" "subst"] {dev}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+depends: [
+  "conf-cmake" {build}
+  "dune" {>= "3.0.0"}
+  "dune-configurator" {>= "3.0.0"}
+  "ocaml" {>= "4.14"}
+]
+depexts: [
+  ["clang" "libncurses-dev"] {os-family = "debian"}
+  ["clang" "ncurses-devel"] {os-family = "fedora"}
+]
+x-maintenance-intent: ["(latest)"]

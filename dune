@@ -1,0 +1,2 @@
+(dirs :standard)
+(data_only_dirs node_modules)

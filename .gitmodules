@@ -1,0 +1,3 @@
+[submodule "c/llbuild"]
+	path = c/llbuild
+	url = https://github.com/swiftlang/swift-llbuild.git

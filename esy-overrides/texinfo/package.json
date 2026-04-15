@@ -1,0 +1,7 @@
+{
+  "name": "esy-texinfo",
+  "version": "0.0.0",
+  "esy": {
+    "build": "true"
+  }
+}

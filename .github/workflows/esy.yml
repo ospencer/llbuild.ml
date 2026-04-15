@@ -1,0 +1,87 @@
+name: Esy
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# This will cancel previous runs when a branch or PR is updated
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Setup node.js
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+        with:
+          node-version: "22"
+          check-latest: true
+
+      - name: Setup environment
+        run: |
+          npm i -g esy@0.9.2
+          npm i -g shx
+
+      - name: Checkout project
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: "recursive"
+
+      - name: Install local dependencies
+        run: |
+          esy install
+
+      - name: Esy cache
+        id: esy-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: _export
+          key: ${{ runner.os }}-esy-${{ hashFiles('esy.lock/index.json') }}
+
+      - name: Import esy cache
+        if: steps.esy-cache.outputs.cache-hit == 'true'
+        run: |
+          esy import-dependencies _export
+          shx rm -rf _export
+
+      - name: Build release dependencies
+        if: steps.esy-cache.outputs.cache-hit != 'true'
+        run: |
+          esy build-dependencies --release
+
+      - name: Build project in release
+        run: |
+          esy build --release
+
+      - name: Build dependencies
+        if: steps.esy-cache.outputs.cache-hit != 'true'
+        run: |
+          esy build-dependencies
+
+      - name: Build project
+        run: |
+          esy build
+
+      - name: Build esy cache
+        if: steps.esy-cache.outputs.cache-hit != 'true'
+        run: |
+          esy export-dependencies
+
+      - name: Run tests
+        run: |
+          esy test
+
+      - name: Check format
+        if: inputs.os == 'ubuntu-latest'
+        run: |
+          esy format
+          git diff --exit-code --name-only

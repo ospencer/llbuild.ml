@@ -1,0 +1,30 @@
+(library
+ (name llbuild)
+ (public_name llbuild)
+ (libraries libllbuild.c ctypes ctypes-foreign llbuild_ffi)
+ (modules llbuild llbuild_generated)
+ (ocamlopt_flags (:standard -w -32))
+ (ocamlc_flags (:standard -w -32))
+ (foreign_stubs
+  (language c)
+  (names llbuild_stubs)
+  (extra_deps
+   ../c/llbuild.h
+   ../c/llbuild-defines.h
+   ../c/core.h
+   ../c/buildsystem.h
+   ../c/db.h
+   ../c/buildkey.h
+   ../c/buildvalue.h
+   ../c/ninja.h)
+  (flags :standard "-I" "../c")))
+
+(rule
+ (targets llbuild_stubs.c)
+ (deps (:gen ../stubgen/generate.exe))
+ (action (with-stdout-to %{targets} (run %{gen} c))))
+
+(rule
+ (targets llbuild_generated.ml)
+ (deps (:gen ../stubgen/generate.exe))
+ (action (with-stdout-to %{targets} (run %{gen} ml))))
