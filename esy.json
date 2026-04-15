@@ -21,11 +21,13 @@
     "@opam/conf-cmake": "*"
   },
   "resolutions": {
+    "@opam/conf-cmake": "link:./esy-overrides/conf-cmake",
     "@opam/conf-libffi": "link:./esy-overrides/conf-libffi",
     "@opam/conf-pkg-config": "link:./esy-overrides/conf-pkg-config",
     "esy-texinfo": "link:./esy-overrides/texinfo"
   },
   "devDependencies": {
-    "@opam/ocaml-lsp-server": "*"
+    "@opam/ocaml-lsp-server": "*",
+    "@opam/ocamlformat": "0.27.0"
   }
 }

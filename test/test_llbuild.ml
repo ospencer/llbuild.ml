@@ -3,19 +3,17 @@ let tests_run = ref 0
 
 let assert_equal ~name expected actual =
   incr tests_run;
-  if expected <> actual then begin
+  if expected <> actual then (
     Printf.eprintf "FAIL: %s\n  expected: %s\n  actual:   %s\n" name expected
       actual;
-    incr failures
-  end
+    incr failures)
   else Printf.printf "PASS: %s\n" name
 
 let assert_true ~name condition =
   incr tests_run;
-  if not condition then begin
+  if not condition then (
     Printf.eprintf "FAIL: %s\n" name;
-    incr failures
-  end
+    incr failures)
   else Printf.printf "PASS: %s\n" name
 
 let test_version () =
@@ -117,8 +115,7 @@ let test_build_key_target () =
   let open Llbuild.Build_key in
   let k = make_target "my-target" in
   assert_true ~name:"Build_key target kind" (get_kind k = Target);
-  assert_equal ~name:"Build_key get_target_name" "my-target"
-    (get_target_name k);
+  assert_equal ~name:"Build_key get_target_name" "my-target" (get_target_name k);
   destroy k
 
 let test_build_key_equal () =
@@ -127,8 +124,7 @@ let test_build_key_equal () =
   let k2 = make_command "cmd" in
   let k3 = make_command "other" in
   assert_true ~name:"Build_key equal same command" (equal k1 k2);
-  assert_true ~name:"Build_key not equal different command"
-    (not (equal k1 k3));
+  assert_true ~name:"Build_key not equal different command" (not (equal k1 k3));
   destroy k1;
   destroy k2;
   destroy k3
@@ -137,8 +133,7 @@ let test_build_key_hash () =
   let open Llbuild.Build_key in
   let k1 = make_command "cmd" in
   let k2 = make_command "cmd" in
-  assert_true ~name:"Build_key hash equal for equal keys"
-    (hash k1 = hash k2);
+  assert_true ~name:"Build_key hash equal for equal keys" (hash k1 = hash k2);
   destroy k1;
   destroy k2
 
@@ -146,8 +141,7 @@ let test_build_key_make_roundtrip () =
   let open Llbuild.Build_key in
   let k1 = make_command "roundtrip-cmd" in
   let k2 = make_command "roundtrip-cmd" in
-  assert_true ~name:"Build_key make roundtrip preserves equality"
-    (equal k1 k2);
+  assert_true ~name:"Build_key make roundtrip preserves equality" (equal k1 k2);
   destroy k1;
   destroy k2
 
@@ -232,14 +226,14 @@ let test_database () =
   let result = Llbuild.Database.open_ ~path:tmp ~schema_version:9 in
   (match result with
   | Ok db ->
-    let epoch = Llbuild.Database.get_epoch db in
-    assert_true ~name:"Database epoch is non-negative" (epoch >= 0);
-    Llbuild.Database.destroy db
+      let epoch = Llbuild.Database.get_epoch db in
+      assert_true ~name:"Database epoch is non-negative" (epoch >= 0);
+      Llbuild.Database.destroy db
   | Error msg ->
-    assert_true
-      ~name:(Printf.sprintf "Database.open_ succeeded (got error: %s)" msg)
-      false);
-  (try Sys.remove tmp with Sys_error _ -> ())
+      assert_true
+        ~name:(Printf.sprintf "Database.open_ succeeded (got error: %s)" msg)
+        false);
+  try Sys.remove tmp with Sys_error _ -> ()
 
 let test_database_reopen_increments_epoch () =
   let tmp = Filename.temp_file "llbuild_test" ".db" in
@@ -248,34 +242,34 @@ let test_database_reopen_increments_epoch () =
   let epoch1 =
     match Llbuild.Database.open_ ~path:tmp ~schema_version:9 with
     | Ok db ->
-      let e = Llbuild.Database.get_epoch db in
-      Llbuild.Database.destroy db;
-      e
+        let e = Llbuild.Database.get_epoch db in
+        Llbuild.Database.destroy db;
+        e
     | Error msg ->
-      assert_true
-        ~name:
-          (Printf.sprintf
-             "Database reopen: first open succeeded (got error: %s)" msg)
-        false;
-      -1
+        assert_true
+          ~name:
+            (Printf.sprintf
+               "Database reopen: first open succeeded (got error: %s)" msg)
+          false;
+        -1
   in
   create_engine_db tmp;
   let epoch2 =
     match Llbuild.Database.open_ ~path:tmp ~schema_version:9 with
     | Ok db ->
-      let e = Llbuild.Database.get_epoch db in
-      Llbuild.Database.destroy db;
-      e
+        let e = Llbuild.Database.get_epoch db in
+        Llbuild.Database.destroy db;
+        e
     | Error msg ->
-      assert_true
-        ~name:
-          (Printf.sprintf
-             "Database reopen: second open succeeded (got error: %s)" msg)
-        false;
-      -1
+        assert_true
+          ~name:
+            (Printf.sprintf
+               "Database reopen: second open succeeded (got error: %s)" msg)
+          false;
+        -1
   in
   assert_true ~name:"Database epoch increments on reopen" (epoch2 > epoch1);
-  (try Sys.remove tmp with Sys_error _ -> ())
+  try Sys.remove tmp with Sys_error _ -> ()
 
 let test_engine_simple_build () =
   let open Llbuild in
@@ -326,7 +320,7 @@ let test_engine_with_db () =
   let result = Engine.build engine "key" in
   assert_equal ~name:"Engine build with db" "db-result" result;
   Engine.destroy engine;
-  (try Sys.remove tmp with Sys_error _ -> ())
+  try Sys.remove tmp with Sys_error _ -> ()
 
 let test_engine_dependency_chain () =
   let open Llbuild in
@@ -346,8 +340,7 @@ let test_engine_dependency_chain () =
               }
             else
               {
-                start =
-                  (fun ti -> Engine.Task_interface.request_input ti "B" 1);
+                start = (fun ti -> Engine.Task_interface.request_input ti "B" 1);
                 provide_value = (fun _ti ~input_id:_ _value -> ());
                 inputs_available =
                   (fun ti ->
@@ -383,16 +376,14 @@ let test_engine_provide_value () =
             else
               {
                 start =
-                  (fun ti ->
-                    Engine.Task_interface.request_input ti "dep" 42);
+                  (fun ti -> Engine.Task_interface.request_input ti "dep" 42);
                 provide_value =
                   (fun _ti ~input_id value ->
                     received_value := value;
                     received_input_id := input_id);
                 inputs_available =
                   (fun ti ->
-                    Engine.Task_interface.complete ti "done"
-                      ~force_change:false);
+                    Engine.Task_interface.complete ti "done" ~force_change:false);
               });
         error = (fun _msg -> ());
         cycle_detected = (fun _keys -> ());
@@ -432,7 +423,7 @@ let test_engine_error_callback () =
   assert_true ~name:"Engine attach_db with bad path fails"
     (Result.is_error bad_result);
   Engine.destroy engine;
-  (try Sys.remove tmp with Sys_error _ -> ())
+  try Sys.remove tmp with Sys_error _ -> ()
 
 let () =
   test_version ();
@@ -462,7 +453,6 @@ let () =
   test_engine_provide_value ();
   test_engine_error_callback ();
   Printf.printf "\n%d/%d tests passed\n" (!tests_run - !failures) !tests_run;
-  if !failures > 0 then begin
+  if !failures > 0 then (
     Printf.eprintf "%d FAILURES\n" !failures;
-    exit 1
-  end
+    exit 1)

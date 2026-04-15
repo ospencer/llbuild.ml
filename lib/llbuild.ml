@@ -77,8 +77,7 @@ module Engine = struct
 
     let request_input t key input_id =
       let d, _buf = Data.to_llb_data key in
-      C.llb_buildengine_task_needs_input t (addr d)
-        (Uintptr.of_int input_id)
+      C.llb_buildengine_task_needs_input t (addr d) (Uintptr.of_int input_id)
 
     let must_follow t key =
       let d, _buf = Data.to_llb_data key in
@@ -103,9 +102,7 @@ module Engine = struct
     let create ~prevent_gc delegate =
       let td = make T.llb_task_delegate in
       setf td T.llb_td_context null;
-      let destroy_ctx =
-        coerce_fn (ptr void @-> returning void) (fun _ -> ())
-      in
+      let destroy_ctx = coerce_fn (ptr void @-> returning void) (fun _ -> ()) in
       setf td T.llb_td_destroy_context destroy_ctx;
       let start_fn =
         coerce_fn
@@ -119,9 +116,7 @@ module Engine = struct
          @-> ptr T.llb_data @-> returning void)
           (fun _ctx _eng_ctx ti input_id value_ptr ->
             let value = Data.of_llb_data_ptr value_ptr in
-            delegate.provide_value ti
-              ~input_id:(Uintptr.to_int input_id)
-              value)
+            delegate.provide_value ti ~input_id:(Uintptr.to_int input_id) value)
       in
       setf td T.llb_td_provide_value provide_fn;
       let available_fn =
@@ -132,7 +127,7 @@ module Engine = struct
       setf td T.llb_td_inputs_available available_fn;
       prevent_gc :=
         Obj.repr destroy_ctx :: Obj.repr start_fn :: Obj.repr provide_fn
-        :: Obj.repr available_fn :: !(prevent_gc);
+        :: Obj.repr available_fn :: !prevent_gc;
       C.llb_task_create td
   end
 
@@ -151,9 +146,7 @@ module Engine = struct
     let prevent_gc = ref [] in
     let d = make T.llb_buildengine_delegate in
     setf d T.llb_bed_context null;
-    let destroy_ctx =
-      coerce_fn (ptr void @-> returning void) (fun _ -> ())
-    in
+    let destroy_ctx = coerce_fn (ptr void @-> returning void) (fun _ -> ()) in
     setf d T.llb_bed_destroy_context destroy_ctx;
     let lookup_fn =
       coerce_fn
@@ -187,7 +180,7 @@ module Engine = struct
           setf rule T.llb_rule_update_status update_fn;
           prevent_gc :=
             Obj.repr create_task_fn :: Obj.repr is_valid_fn
-            :: Obj.repr update_fn :: !(prevent_gc);
+            :: Obj.repr update_fn :: !prevent_gc;
           rule_out <-@ rule)
     in
     setf d T.llb_bed_lookup_rule lookup_fn;
@@ -210,7 +203,7 @@ module Engine = struct
     setf d T.llb_bed_cycle_detected cycle_fn;
     prevent_gc :=
       Obj.repr destroy_ctx :: Obj.repr lookup_fn :: Obj.repr error_fn
-      :: Obj.repr cycle_fn :: !(prevent_gc);
+      :: Obj.repr cycle_fn :: !prevent_gc;
     let ptr = C.llb_buildengine_create d in
     { ptr; prevent_gc }
 
@@ -271,8 +264,7 @@ module Scheduler_algorithm = struct
   type t = Command_name_priority | Fifo
 
   let to_int = function
-    | Command_name_priority ->
-        T.llb_scheduler_algorithm_command_name_priority
+    | Command_name_priority -> T.llb_scheduler_algorithm_command_name_priority
     | Fifo -> T.llb_scheduler_algorithm_fifo
 end
 
@@ -310,12 +302,8 @@ module Build_key = struct
 
   let destroy = C.llb_build_key_destroy
   let equal a b = C.llb_build_key_equal a b
-
-  let hash k =
-    Unsigned.Size_t.to_int (C.llb_build_key_hash k)
-
+  let hash k = Unsigned.Size_t.to_int (C.llb_build_key_hash k)
   let get_kind k = kind_of_int (C.llb_build_key_get_kind k)
-
   let make_command name = C.llb_build_key_make_command name
 
   let get_command_name k =
@@ -428,9 +416,7 @@ module Build_value = struct
   let make_propagated_failure_command () =
     C.llb_build_value_make_propagated_failure_command ()
 
-  let make_cancelled_command () =
-    C.llb_build_value_make_cancelled_command ()
-
+  let make_cancelled_command () = C.llb_build_value_make_cancelled_command ()
   let make_skipped_command () = C.llb_build_value_make_skipped_command ()
 
   let make_directory_tree_signature sig_ =

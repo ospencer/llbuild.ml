@@ -3,8 +3,10 @@
  (public_name llbuild)
  (libraries libllbuild.c ctypes ctypes-foreign llbuild_ffi)
  (modules llbuild llbuild_generated)
- (ocamlopt_flags (:standard -w -32))
- (ocamlc_flags (:standard -w -32))
+ (ocamlopt_flags
+  (:standard -w -32))
+ (ocamlc_flags
+  (:standard -w -32))
  (foreign_stubs
   (language c)
   (names llbuild_stubs)
@@ -21,10 +23,18 @@
 
 (rule
  (targets llbuild_stubs.c)
- (deps (:gen ../stubgen/generate.exe))
- (action (with-stdout-to %{targets} (run %{gen} c))))
+ (deps
+  (:gen ../stubgen/generate.exe))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{gen} c))))
 
 (rule
  (targets llbuild_generated.ml)
- (deps (:gen ../stubgen/generate.exe))
- (action (with-stdout-to %{targets} (run %{gen} ml))))
+ (deps
+  (:gen ../stubgen/generate.exe))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{gen} ml))))

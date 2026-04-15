@@ -51,7 +51,10 @@ module Engine : sig
   type t
 
   val create : delegate -> t
-  val attach_db : t -> path:string -> schema_version:int -> (unit, string) result
+
+  val attach_db :
+    t -> path:string -> schema_version:int -> (unit, string) result
+
   val build : t -> Data.t -> Data.t
   val destroy : t -> unit
 end
