@@ -40,6 +40,11 @@ jobs:
         uses: ocaml/setup-ocaml@c2e6bb92370612b89f302c3aaefa1da45ee2d702 # v3.2.15
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          # Install Cygwin's ninja on Windows so the swift-llbuild CMake
+          # build can use the Ninja generator (Unix Makefiles + cygwin gmake
+          # + CMAKE_SYSTEM_NAME=Windows produces a Makefile graph cygwin
+          # make can't resolve — ninja handles the mixed paths fine).
+          cygwin-extra-packages: ninja
 
       - name: Install local dependencies
         run: |
