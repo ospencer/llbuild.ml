@@ -27,7 +27,6 @@
     "@opam/conf-cmake": "link:./esy-overrides/conf-cmake",
     "@opam/conf-libffi": "link:./esy-overrides/conf-libffi",
     "@opam/conf-pkg-config": "link:./esy-overrides/conf-pkg-config",
-    "esy-libffi": "link:./esy-overrides/libffi",
     "esy-texinfo": "link:./esy-overrides/texinfo"
   },
   "devDependencies": {

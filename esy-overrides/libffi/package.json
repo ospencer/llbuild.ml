@@ -1,7 +1,0 @@
-{
-  "name": "esy-libffi",
-  "version": "0.0.0",
-  "esy": {
-    "build": "true"
-  }
-}
