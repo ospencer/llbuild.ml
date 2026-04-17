@@ -32,9 +32,7 @@ jobs:
 
       - name: Install build tools (macOS)
         if: matrix.os == 'macos-latest'
-        run: |
-          brew install cmake binutils
-          echo "CCAS=clang -fno-integrated-as" >> $GITHUB_ENV
+        run: brew install cmake libffi
 
       - name: Install cmake (Windows)
         if: matrix.os == 'windows-latest'

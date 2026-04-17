@@ -1,0 +1,14 @@
+{
+  "name": "esy-libffi",
+  "version": "0.0.0",
+  "esy": {
+    "buildsInSource": true,
+    "build": "sh build.sh",
+    "exportedEnv": {
+      "PKG_CONFIG_PATH": {
+        "val": "#{self.install / 'lib' / 'pkgconfig'}:$PKG_CONFIG_PATH",
+        "scope": "global"
+      }
+    }
+  }
+}

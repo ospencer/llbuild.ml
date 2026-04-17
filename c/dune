@@ -85,7 +85,7 @@
   (no-infer
    (progn
     (bash
-     "sed -i '/-Wbool-conversion\\|-Wconstant-conversion\\|-Wdocumentation\\|-Wmost\\|-Wnewline-eof\\|-Wenum-conversion\\|-Wint-conversion/d' llbuild/CMakeLists.txt")
+     "sed -i '/-Wbool-conversion\\|-Wconstant-conversion\\|-Wdocumentation\\|-Wmost\\|-Wnewline-eof\\|-Wenum-conversion\\|-Wint-conversion/d' llbuild/CMakeLists.txt && sed -i '/#include <new>/a #include <unistd.h>' llbuild/lib/llvm/Support/ErrorHandling.cpp")
     (run
      cmake
      -S
