@@ -6,23 +6,23 @@
     "build": "sh build.sh",
     "exportedEnv": {
       "PKG_CONFIG_PATH": {
-        "val": "#{self.install / 'lib' / 'pkgconfig'}:$PKG_CONFIG_PATH",
+        "val": "#{self.install / 'lib' / 'pkgconfig'}",
         "scope": "global"
       },
       "CPATH": {
-        "val": "#{self.install / 'include'}:$CPATH",
+        "val": "#{self.install / 'include'}",
         "scope": "global"
       },
       "LIBRARY_PATH": {
-        "val": "#{self.install / 'lib'}:$LIBRARY_PATH",
+        "val": "#{self.install / 'lib'}",
         "scope": "global"
       },
       "LD_LIBRARY_PATH": {
-        "val": "#{self.install / 'lib'}:$LD_LIBRARY_PATH",
+        "val": "#{self.install / 'lib'}",
         "scope": "global"
       },
       "DYLD_LIBRARY_PATH": {
-        "val": "#{self.install / 'lib'}:$DYLD_LIBRARY_PATH",
+        "val": "#{self.install / 'lib'}",
         "scope": "global"
       }
     }

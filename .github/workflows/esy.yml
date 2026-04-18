@@ -34,9 +34,11 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: brew install cmake libffi pkg-config
 
-      - name: Install cmake (Windows)
+      - name: Install cmake and pkg-config (Windows)
         if: matrix.os == 'windows-latest'
-        run: choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+        run: |
+          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          choco install pkgconfiglite
 
       - name: Enable git symlinks (Windows)
         if: runner.os == 'Windows'
