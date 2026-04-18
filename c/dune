@@ -85,7 +85,7 @@
   (no-infer
    (progn
     (bash
-     "sed -i '/-Wbool-conversion\\|-Wconstant-conversion\\|-Wdocumentation\\|-Wmost\\|-Wnewline-eof\\|-Wenum-conversion\\|-Wint-conversion/d' llbuild/CMakeLists.txt && sed -i '/#include <new>/a #include <unistd.h>' llbuild/lib/llvm/Support/ErrorHandling.cpp && sed -i 's|#include \"Windows/WindowsSupport.h\"|#include \"WindowsSupport.h\"|' llbuild/lib/llvm/Support/Windows/Threading.inc && sed -i '/template<> struct ::llvm::DenseMapInfo<DBKeyID>/,/^};[[:space:]]*$/ { s|template<> struct ::llvm::DenseMapInfo<DBKeyID>|namespace llvm { template<> struct DenseMapInfo<DBKeyID>|; s|^};[[:space:]]*$|}; }|; }' llbuild/lib/Core/SQLiteBuildDB.cpp")
+     "sed -i '/-Wbool-conversion\\|-Wconstant-conversion\\|-Wdocumentation\\|-Wmost\\|-Wnewline-eof\\|-Wenum-conversion\\|-Wint-conversion/d' llbuild/CMakeLists.txt && sed -i '/#include <new>/a #include <unistd.h>' llbuild/lib/llvm/Support/ErrorHandling.cpp && sed -i 's|#include \"Windows/WindowsSupport.h\"|#include \"WindowsSupport.h\"|' llbuild/lib/llvm/Support/Windows/Threading.inc && sed -i '/template<> struct ::llvm::DenseMapInfo<DBKeyID>/,/^};[[:space:]]*$/ { s|template<> struct ::llvm::DenseMapInfo<DBKeyID>|namespace llvm { template<> struct DenseMapInfo<DBKeyID>|; s|^};[[:space:]]*$|}; }|; }' llbuild/lib/Core/SQLiteBuildDB.cpp && sed -i 's|#ifdef _MSC_VER|#if defined(_WIN32)|' llbuild/products/libllbuild/include/llbuild/buildsystem.h")
     (run
      cmake
      -S

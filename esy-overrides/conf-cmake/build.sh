@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eu
 
 mkdir -p "$cur__install/bin"
 
