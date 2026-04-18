@@ -1,11 +1,18 @@
 #!/bin/sh
-set -e
+set -eu
 
 mkdir -p "$cur__install/bin"
 
 install_from() {
   ln -sf "$1" "$cur__install/bin/pkg-config"
 }
+
+for prog in pkg-config pkgconf pkg-config.exe pkgconf.exe; do
+  if command -v "$prog" >/dev/null 2>&1; then
+    install_from "$(command -v "$prog")"
+    exit 0
+  fi
+done
 
 for dir in /opt/homebrew/bin /usr/local/bin /usr/bin /bin; do
   for name in pkg-config pkgconf; do
@@ -14,13 +21,6 @@ for dir in /opt/homebrew/bin /usr/local/bin /usr/bin /bin; do
       exit 0
     fi
   done
-done
-
-for name in pkg-config pkgconf; do
-  if command -v "$name" >/dev/null 2>&1; then
-    install_from "$(command -v "$name")"
-    exit 0
-  fi
 done
 
 # Fallback shim: when no real pkg-config is available, emit values from

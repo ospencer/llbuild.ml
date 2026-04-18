@@ -145,4 +145,6 @@
    (= %{system} win64)
    (= %{system} mingw64)))
  (action
-  (write-file %{targets} "(-lstdc++)")))
+  (write-file
+   %{targets}
+   "(-lstdc++ -lpthread -lshlwapi -lole32 -luuid -lshell32)")))
