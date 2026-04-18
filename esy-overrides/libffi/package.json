@@ -9,6 +9,14 @@
         "val": "#{self.install / 'lib' / 'pkgconfig'}:$PKG_CONFIG_PATH",
         "scope": "global"
       },
+      "CPATH": {
+        "val": "#{self.install / 'include'}:$CPATH",
+        "scope": "global"
+      },
+      "LIBRARY_PATH": {
+        "val": "#{self.install / 'lib'}:$LIBRARY_PATH",
+        "scope": "global"
+      },
       "LD_LIBRARY_PATH": {
         "val": "#{self.install / 'lib'}:$LD_LIBRARY_PATH",
         "scope": "global"
