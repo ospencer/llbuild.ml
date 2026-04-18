@@ -2,6 +2,7 @@
   "name": "conf-pkg-config",
   "version": "0.0.0",
   "esy": {
-    "build": "true"
+    "buildsInSource": true,
+    "build": "sh build.sh"
   }
 }
